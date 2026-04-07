@@ -48,7 +48,7 @@
 
     - name: Create lab Zone File
       ansible.builtin.copy:
-        dest: /etc/bind/db.lab
+        dest: /var/lib/bind/db.lab
         content: |
           $TTL    604800
           @       IN      SOA     dns.lab. admin.lab. (
@@ -60,6 +60,33 @@
           ;
           @       IN      NS      dns.lab.
           dns     IN      A       192.168.2.10
+        owner: bind
+        group: bind
+        mode: "0644"
+      notify: Restart BIND9
+
+    - name: Create TSIG key for Dynamic Updates
+      ansible.builtin.copy:
+        dest: /etc/bind/tsig.key
+        content: |
+          key "tsig-key" {
+              algorithm hmac-sha256;
+              secret "{{ vault_tsig_key_secret }}";
+          };
+        owner: root
+        group: bind
+        mode: "0640"
+
+    - name: Configure Local Zone Declaration
+      ansible.builtin.copy:
+        dest: /etc/bind/named.conf.local
+        content: |
+          include "/etc/bind/tsig.key";
+          zone "lab" {
+              type master;
+              allow-update { key "tsig-key"; };
+              file "/var/lib/bind/db.lab";
+          };
         owner: root
         group: bind
         mode: "0644"
