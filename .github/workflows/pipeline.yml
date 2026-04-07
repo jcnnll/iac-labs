@@ -14,6 +14,9 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      - name: Terraform Init
+        run: terraform -chdir=terraform init -backend=false
+
       - name: Setup TFLint
         uses: terraform-linters/setup-tflint@v4
 
