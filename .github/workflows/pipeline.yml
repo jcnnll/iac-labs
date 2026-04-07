@@ -14,19 +14,24 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Install Security Tools
-        run: |
-          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash -c "set +u; bash"
-          curl -s https://raw.githubusercontent.com/aquasecurity/tfsec/master/scripts/install.sh | bash -c "set +u; bash"
-          pip install checkov
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
 
       - name: Run tflint
         run: |
           tflint --init --config "$(pwd)/terraform/.tflint.hcl" --chdir=terraform
           tflint --config "$(pwd)/terraform/.tflint.hcl" --chdir=terraform
 
+      - name: Terraform Validate
+        run: terraform -chdir=terraform validate
+
       - name: Run tfsec
-        run: tfsec terraform
+        uses: aquasecurity/tfsec-action@v1.0.0
+        with:
+          working_directory: terraform
+
+      - name: Install Checkov
+        run: pip install checkov
 
       - name: Run checkov
         run: checkov -d terraform
