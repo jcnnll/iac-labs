@@ -8,6 +8,9 @@
       # This runs on your Mac (the control node) before touching the VM
       ansible.builtin.command:
         cmd: "ansible-galaxy collection install -r {{ playbook_dir }}/requirements.yml --force"
+      delegate_to: localhost
+      register: galaxy_output
+      changed_when: "'is already installed' not in galaxy_output.stdout"
 
     - name: Configure local SSH aliases for vlab
       ansible.builtin.blockinfile:

@@ -1,28 +1,37 @@
-terraform {
-  required_version = ">= 1.14.8"
-
-  required_providers {
-    null = {
-      source  = "hashicorp/null"
-      version = "~> 3.2.0"
-    }
-    local = {
-      source  = "hashicorp/local"
-      version = "~> 2.5.1"
-    }
-  }
-}
 
 resource "local_file" "config" {
   # Use single $ to resolve the path and render the template
   filename = "${path.module}/.dns.yaml"
   content = templatefile("${path.module}/vm_base.tftpl", {
-    image_url   = "https://cloud-images.ubuntu.com/releases/jammy/release/ubuntu-22.04-server-cloudimg-arm64.img"
+    image_url   = var.dns_vm.image_url
     socket_path = "/tmp/vlab_vmnet"
-    static_ip   = "192.168.2.10"
-    hostname    = "dns"
-    cpus        = 1
-    memory      = "512MiB"
+    static_ip   = var.dns_vm.static_ip
+    hostname    = var.dns_vm.hostname
+    cpus        = var.dns_vm.cpus
+    memory      = var.dns_vm.memory
+    disk        = var.dns_vm.disk
+    script      = <<-EOT
+                    # 1. Set Identity
+                    hostnamectl set-hostname ${var.dns_vm.hostname}
+                    echo "${var.dns_vm.static_ip} ${var.dns_vm.hostname}" >> /etc/hosts
+
+                    # 2. Bootstrap networking (Phase 1 logic)
+                    cat > /etc/netplan/50-static-dns.yaml <<'EOF'
+                    network:
+                      version: 2
+                      ethernets:
+                        eth0:
+                          addresses:
+                            - ${var.dns_vm.static_ip}/24
+                          nameservers:
+                            addresses: [8.8.8.8]
+                    EOF
+                    netplan apply
+
+                    # 3. Force DNS for immediate package/ansible readiness
+                    rm -f /etc/resolv.conf
+                    echo "nameserver 8.8.8.8" > /etc/resolv.conf
+                  EOT
   })
 }
 

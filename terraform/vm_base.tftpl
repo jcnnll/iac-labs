@@ -3,6 +3,7 @@ images:
 
 cpus: ${cpus}
 memory: ${memory}
+disk: ${disk}
 
 networks:
   - socket: "${socket_path}"
@@ -10,23 +11,4 @@ networks:
 provision:
   - mode: system
     script: |
-      # 1. Set Identity
-      hostnamectl set-hostname ${hostname}
-      echo "${static_ip} ${hostname}" >> /etc/hosts
-
-      # 2. Bootstrap networking (Phase 1 logic)
-      cat > /etc/netplan/50-static-dns.yaml <<'EOF'
-      network:
-        version: 2
-        ethernets:
-          eth0:
-            addresses:
-              - ${static_ip}/24
-            nameservers:
-              addresses: [8.8.8.8]
-      EOF
-      netplan apply
-
-      # 3. Force DNS for immediate package/ansible readiness
-      rm -f /etc/resolv.conf
-      echo "nameserver 8.8.8.8" > /etc/resolv.conf
+      ${indent(6,script)}
