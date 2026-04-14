@@ -1,19 +1,23 @@
-# IaC-lab: Research & Experimentation
+# IaC-labs
 
-Personal workbench for testing local Infrastructure-as-Code (IaC) patterns. 
+A set of AWS infrastructure-as-code labs built for local experimentation using LocalStack.
 
-## Tools:
+These labs focus on implementing and testing AWS infrastructure patterns using Terraform and AWS-native tooling without deploying to real cloud environments.
 
-- Terraform handles infrastructure provisioning
-- Ansible handles machine state management
-- Lima handles individual VM instance life-cycle management
+## Purpose
 
-## Purpose:
+This repository is for:
+- Practicing AWS IaC workflows
+- Running AWS services locally using LocalStack
+- Testing infrastructure changes safely before cloud deployment
+- Experimenting with AWS architecture patterns
+- Validating CI/CD workflows for infrastructure changes
 
-This is a place for learning and experimentation where one of the main experiments being run against this repo is implementing automated static code anaylis and security scans for IaC code bases.
+## Core Technologies
+- Terraform
+- AWS SDK
+- AWS CloudFormation
+- GitHub Actions
+- LocalStack
 
-## CI Process
 
-For local linting and static code analysis the `scripts/pre-commit.sh` can be run to lint, validate an run security scans on the Terraform codebase and Ansible-Lint on the Ansible codebase.
-
-The GitHub Actions pipeline defined for the project will run all the static code analysis and security scans when changes are committed to the repository.
