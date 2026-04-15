@@ -1,4 +1,0 @@
----
-# Rules to ignore entirely
-skip_list:
-  - internal-error
